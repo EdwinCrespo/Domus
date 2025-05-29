@@ -72,24 +72,27 @@ const Login = () => {
 
           // Actualizar el objeto user con los datos del backend y preservar la avatar_url de Supabase Auth
           const updatedUser = {
-            ...data.user, // Esto incluye los metadatos actuales de Supabase Auth
+            ...data.user,
             user_metadata: {
-              ...data.user?.user_metadata, // Preservar todos los metadatos existentes de Supabase Auth
-              nombre: userData.nombre, // Sobrescribir/añadir nombre del backend
-              apellido: userData.apellido, // Sobrescribir/añadir apellido del backend
-              // La avatar_url ya está en data.user?.user_metadata, por lo que se preservará con el spread (...data.user?.user_metadata)
+              ...data.user?.user_metadata,
+              nombre: userData.nombre,
+              apellido: userData.apellido,
             },
           }
 
           setUser(updatedUser)
+          
+          // Asegurarnos de que la redirección se realice después de actualizar el estado
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true })
+          }, 100)
         } catch (err) {
           console.error('Error al obtener datos del usuario:', err)
+          // Aún así redirigir al dashboard si falla la obtención de datos adicionales
+          navigate('/dashboard', { replace: true })
         }
-
-        navigate('/dashboard', { replace: true })
       }
     } catch (err) {
-      // Verificar si el error es por credenciales inválidas y traducirlo
       if (err instanceof Error && err.message === 'Invalid login credentials') {
         setError('Credenciales de inicio de sesión no válidas')
       } else {
