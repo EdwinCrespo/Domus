@@ -9,6 +9,7 @@ import Productos from './pages/Productos'
 import InventarioPage from './pages/InventarioPage'
 import Proveedores from './pages/Proveedores'
 import RealizarCompra from './pages/RealizarCompra'
+import Clientes from './pages/Clientes'
 import { useAuthStore } from './store/authStore'
 import Sidebar from './components/Sidebar'
 import { supabase } from './lib/supabase'
@@ -97,6 +98,7 @@ const App = () => {
           <Route path="/productos/inventario" element={<InventarioPage />} />
           <Route path="/compras/proveedores" element={<Proveedores />} />
           <Route path="/compras/nueva" element={<RealizarCompra />} />
+          <Route path="/ventas/clientes" element={<Clientes />} />
         </Route>
 
         <Route 
