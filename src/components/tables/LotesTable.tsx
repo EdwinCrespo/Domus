@@ -97,47 +97,30 @@ const LotesTable: React.FC<LotesTableProps> = ({
     cargarLotes();
   }, [isOpen, productoId]);
 
-  if (loading) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Lotes de {nombreProducto}</DialogTitle>
-          </DialogHeader>
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-              <p className="mt-4 text-gray-600">Cargando lotes...</p>
-            </div>
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <p className="mt-4 text-gray-600">Cargando lotes...</p>
           </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+        </div>
+      );
+    }
 
-  if (error) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Lotes de {nombreProducto}</DialogTitle>
-          </DialogHeader>
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center text-red-500">
-              <p>{error}</p>
-            </div>
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center text-red-500">
+            <p>{error}</p>
           </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+        </div>
+      );
+    }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Lotes de {nombreProducto}</DialogTitle>
-        </DialogHeader>
+    return (
+      <div className="max-h-[70vh] overflow-y-auto">
         <DataTable
           columns={columns}
           data={lotes}
@@ -149,6 +132,19 @@ const LotesTable: React.FC<LotesTableProps> = ({
           searchPlaceholder="Buscar en lotes..."
           showDefaultActions={false}
         />
+      </div>
+    );
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[90vw] w-[1200px] max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">
+            Lotes de {nombreProducto}
+          </DialogTitle>
+        </DialogHeader>
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );

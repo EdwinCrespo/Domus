@@ -11,6 +11,9 @@ export interface Categoria {
   nombre: string;
   descripcion: string;
   usuarioId: string;
+  fechaCreacion: Date;
+  fechaActualizacion?: Date;
+  estado: number;
 }
 
 export interface CreateCategoriaDto {
@@ -58,20 +61,31 @@ export const categoriaService = {
       throw new Error('No hay sesión activa');
     }
 
-    const response = await fetch(`${API_URL}/categoria`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify(categoria)
-    });
+    try {
+      const response = await fetch(`${API_URL}/categoria`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          ...categoria,
+          estado: 1,
+          fechaCreacion: new Date().toISOString()
+        })
+      });
 
-    if (!response.ok) {
-      throw new Error('Error al crear la categoría');
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error('Error al crear la categoría');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error completo:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   async deleteCategoria(id: number): Promise<void> {
@@ -148,7 +162,10 @@ export const categoriaService = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`
       },
-      body: JSON.stringify(categoria)
+      body: JSON.stringify({
+        ...categoria,
+        fechaActualizacion: new Date().toISOString()
+      })
     });
 
     if (!response.ok) {

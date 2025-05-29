@@ -208,9 +208,9 @@ export const RegistrarMovimientoDialog: React.FC<RegistrarMovimientoDialogProps>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-3xl h-[90vh] flex flex-col">
         {showAlert && alertInfo && (
-          <div className="mb-4">
+          <div className="mb-4 flex-shrink-0">
             <Alert
               type={alertInfo.type}
               title={alertInfo.title}
@@ -219,7 +219,7 @@ export const RegistrarMovimientoDialog: React.FC<RegistrarMovimientoDialogProps>
             />
           </div>
         )}
-        <DialogHeader>
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Registrar Movimiento de Inventario</DialogTitle>
         </DialogHeader>
 
@@ -239,8 +239,8 @@ export const RegistrarMovimientoDialog: React.FC<RegistrarMovimientoDialogProps>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2">
-          <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-4 pr-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Producto</Label>
@@ -382,17 +382,17 @@ export const RegistrarMovimientoDialog: React.FC<RegistrarMovimientoDialogProps>
               <div className="mt-6 space-y-4">
                 <h3 className="font-semibold text-lg">Lista de movimientos</h3>
                 <div className="border rounded-lg">
-                  <div className="space-y-2 p-2">
+                  <div className="max-h-[200px] overflow-y-auto space-y-2 p-2">
                     {movimientos.map((movimiento, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                       >
-                        <div className="flex-1">
-                          <div className="font-medium">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">
                             {getProductoNombre(lotes.find(l => l.id === movimiento.inventarioLoteId)?.productoId || 0)}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 truncate">
                             Lote: {getLoteInfo(movimiento.inventarioLoteId)} | 
                             Cantidad: {movimiento.cantidad} | 
                             Motivo: {MOTIVOS.find(m => m.value === movimiento.tipo)?.label}
@@ -402,7 +402,7 @@ export const RegistrarMovimientoDialog: React.FC<RegistrarMovimientoDialogProps>
                           variant="ghost"
                           size="sm"
                           onClick={() => setMovimientos(movimientos.filter((_, i) => i !== index))}
-                          className="text-red-600 hover:text-red-700 ml-2"
+                          className="text-red-600 hover:text-red-700 ml-2 flex-shrink-0"
                         >
                           <X className="w-4 h-4" />
                         </Button>

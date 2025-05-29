@@ -15,6 +15,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AddCategoriaDialogProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export function AddCategoriaDialog({
       } catch (err) {
         console.error('Error al cargar categoría:', err);
         setError(err instanceof Error ? err.message : 'Error al cargar la categoría');
+        toast.error('Error al cargar la categoría');
       } finally {
         setIsLoading(false);
       }
@@ -73,36 +75,38 @@ export function AddCategoriaDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast.error('No hay usuario autenticado');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      if (isEditing && categoriaId) {
-        await categoriaService.updateCategoria(categoriaId, {
-          nombre,
-          descripcion
-        });
-      } else {
-        await categoriaService.createCategoria({
-          nombre,
-          descripcion,
-          usuarioId: user.id
-        });
-      }
+      const categoriaData = {
+        nombre,
+        descripcion,
+        usuarioId: user.id
+      };
 
-      onSuccess({ nombre, descripcion, usuarioId: user.id });
-      onClose();
+      await onSuccess(categoriaData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar la categoría');
+      console.error('Error al guardar la categoría:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar la categoría';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open && !isLoading) {
+        onClose();
+      }
+    }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -119,7 +123,7 @@ export function AddCategoriaDialog({
             <Label htmlFor="nombre">Nombre</Label>
             <Input
               id="nombre"
-              value={nombre || ''}
+              value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               placeholder="Ingrese el nombre de la categoría"
               required
@@ -130,7 +134,7 @@ export function AddCategoriaDialog({
             <Label htmlFor="descripcion">Descripción</Label>
             <Textarea
               id="descripcion"
-              value={descripcion || ''}
+              value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Ingrese una descripción"
               required

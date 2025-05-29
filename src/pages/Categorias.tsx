@@ -134,13 +134,15 @@ const Categorias = () => {
   const handleCreateCategoria = async (categoria: CreateCategoriaDto) => {
     try {
       await categoriaService.createCategoria(categoria);
-      // Invalidar el caché de categorías
+      // Invalidar el caché de categorías y forzar una nueva carga
       await queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      await refetch();
       toast.success('Categoría creada exitosamente');
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error('Error al crear la categoría:', error);
       toast.error('Error al crear la categoría');
+      // No cerramos el diálogo si hay error
     }
   };
 
@@ -238,7 +240,6 @@ const Categorias = () => {
         <AddCategoriaDialog
           isOpen={isAddDialogOpen || !!categoriaToEdit}
           onClose={() => {
-            console.log('Cerrando diálogo, limpiando estado');
             setIsAddDialogOpen(false);
             setCategoriaToEdit(null);
           }}

@@ -270,100 +270,102 @@ const InventarioPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => refetch()}
-              className="text-gray-600"
-            >
-              Actualizar
-            </Button>
-            <Button
-              className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={() => setIsRegistrarMovimientoOpen(true)}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Registrar Movimiento
-            </Button>
-          </div>
-        </div>
-
-        <DataTable
-          columns={columns}
-          data={inventarioData || []}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          searchPlaceholder="Buscar en inventario..."
-          showDefaultActions={false}
-        />
-
-        {/* Tabla de Productos Vencidos */}
-        {productosVencidos.length > 0 && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Productos Vencidos
-              </h2>
-              <span className="text-sm text-gray-500">
-                {productosVencidos.length} productos vencidos
-              </span>
+    <div className="h-screen overflow-hidden bg-gray-50">
+      <div className="h-full overflow-y-auto p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                className="text-gray-600"
+              >
+                Actualizar
+              </Button>
+              <Button
+                className="bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => setIsRegistrarMovimientoOpen(true)}
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Registrar Movimiento
+              </Button>
             </div>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="border-b border-gray-200 bg-red-50 px-4 py-3">
-                <p className="text-sm text-red-600">
-                  ⚠️ Productos con fecha de vencimiento expirada
-                </p>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={inventarioData || []}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            searchPlaceholder="Buscar en inventario..."
+            showDefaultActions={false}
+          />
+
+          {/* Tabla de Productos Vencidos */}
+          {productosVencidos.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Productos Vencidos
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {productosVencidos.length} productos vencidos
+                </span>
               </div>
-              <DataTable
-                columns={columnasVencidos}
-                data={productosVencidos}
-                searchTerm=""
-                onSearchChange={() => {}}
-                currentPage={1}
-                itemsPerPage={5}
-                onPageChange={() => {}}
-                showDefaultActions={false}
-              />
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="border-b border-gray-200 bg-red-50 px-4 py-3">
+                  <p className="text-sm text-red-600">
+                    ⚠️ Productos con fecha de vencimiento expirada
+                  </p>
+                </div>
+                <DataTable
+                  columns={columnasVencidos}
+                  data={productosVencidos}
+                  searchTerm=""
+                  onSearchChange={() => {}}
+                  currentPage={1}
+                  itemsPerPage={5}
+                  onPageChange={() => {}}
+                  showDefaultActions={false}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {selectedProducto && (
-          <RegistrarLoteDialog
-            isOpen={isRegistrarLoteOpen}
-            onClose={() => {
-              setIsRegistrarLoteOpen(false);
-              setSelectedProducto(null);
-            }}
-            producto={selectedProducto}
+          {selectedProducto && (
+            <RegistrarLoteDialog
+              isOpen={isRegistrarLoteOpen}
+              onClose={() => {
+                setIsRegistrarLoteOpen(false);
+                setSelectedProducto(null);
+              }}
+              producto={selectedProducto}
+              usuarioId={user?.id || ''}
+            />
+          )}
+
+          <RegistrarMovimientoDialog
+            isOpen={isRegistrarMovimientoOpen}
+            onClose={() => setIsRegistrarMovimientoOpen(false)}
             usuarioId={user?.id || ''}
           />
-        )}
 
-        <RegistrarMovimientoDialog
-          isOpen={isRegistrarMovimientoOpen}
-          onClose={() => setIsRegistrarMovimientoOpen(false)}
-          usuarioId={user?.id || ''}
-        />
-
-        {selectedProductoForLotes && (
-          <LotesTable
-            isOpen={isLotesTableOpen}
-            onClose={() => {
-              setIsLotesTableOpen(false);
-              setSelectedProductoForLotes(null);
-            }}
-            productoId={selectedProductoForLotes.productoId}
-            nombreProducto={selectedProductoForLotes.nombreProducto}
-          />
-        )}
+          {selectedProductoForLotes && (
+            <LotesTable
+              isOpen={isLotesTableOpen}
+              onClose={() => {
+                setIsLotesTableOpen(false);
+                setSelectedProductoForLotes(null);
+              }}
+              productoId={selectedProductoForLotes.productoId}
+              nombreProducto={selectedProductoForLotes.nombreProducto}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

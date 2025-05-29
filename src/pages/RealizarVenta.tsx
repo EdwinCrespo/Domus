@@ -26,8 +26,8 @@ import { clienteService, Cliente as ClienteType } from '../services/clienteServi
 import { productoService, Producto as ProductoBase } from '../services/productoService';
 import { inventarioService, InventarioResumen } from '../services/inventarioService';
 import { ventaService, MetodoPago, CreateVenta } from '../services/ventaService';
-import { useQuery } from '@tanstack/react-query';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from '../components/ui/skeleton';
 
 interface Producto extends ProductoBase {
     precioVenta: number;
@@ -60,6 +60,34 @@ interface Pago {
     metodo: string;
     monto: number;
 }
+
+// Componente Skeleton para la tabla de productos
+const ProductosSkeleton = () => (
+  <div className="space-y-4">
+    <div className="flex justify-between items-center">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-10 w-40" />
+    </div>
+    <div className="bg-white rounded-lg shadow p-4">
+      <div className="space-y-3">
+        {/* Header skeleton */}
+        <div className="grid grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-8" />
+          ))}
+        </div>
+        {/* Rows skeleton */}
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="grid grid-cols-6 gap-4">
+            {[...Array(6)].map((_, j) => (
+              <Skeleton key={j} className="h-12" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 const RealizarVenta = () => {
     const { user } = useAuthStore();
@@ -101,6 +129,31 @@ const RealizarVenta = () => {
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5, // 5 minutos
         refetchOnWindowFocus: false
+    });
+
+    // Usar TanStack Query para obtener los productos
+    const { 
+        data: productosData, 
+        isLoading: isLoadingProductos,
+        error: errorProductos,
+        refetch: refetchProductos 
+    } = useQuery({
+        queryKey: ['productos', user?.id],
+        queryFn: async () => {
+            const productos = await productoService.getProductos(user?.id || '');
+            // Combinar datos de productos con datos de inventario
+            return productos.map(p => {
+                const inventarioItem = inventarioData?.find(i => i.productoId === parseInt(p.id));
+                return {
+                    ...p,
+                    precioVenta: p.precioVenta || 0,
+                    stock: inventarioItem?.stockTotal || 0,
+                    categoria: p.categoriaId ? { nombre: p.categoriaId.toString() } : null
+                };
+            });
+        },
+        enabled: !!user?.id && !!inventarioData,
+        staleTime: 1000 * 60 * 5, // 5 minutos
     });
 
     // Columnas para la tabla de productos disponibles
@@ -169,21 +222,22 @@ const RealizarVenta = () => {
     // Actualizar productos cuando cambia el inventario
     useEffect(() => {
         if (inventarioData) {
-            cargarProductos();
+            refetchProductos();
         }
     }, [inventarioData]);
 
     // Filtrar productos basado en la búsqueda
     const filteredProductos = React.useMemo(() => {
-        if (!searchTerm.trim()) return productos;
+        if (!productosData) return [];
+        if (!searchTerm.trim()) return productosData;
 
         const searchLower = searchTerm.toLowerCase();
-        return productos.filter((producto) =>
+        return productosData.filter((producto) =>
             producto.nombre.toLowerCase().includes(searchLower) ||
             producto.sku.toLowerCase().includes(searchLower) ||
             (producto.codigoBarras?.toLowerCase().includes(searchLower) ?? false)
         );
-    }, [productos, searchTerm]);
+    }, [productosData, searchTerm]);
 
     // Cargar clientes al montar el componente
     useEffect(() => {
@@ -471,10 +525,18 @@ const RealizarVenta = () => {
 
                     {/* Tabla de productos disponibles */}
                     <div className="mb-6">
-                        {loadingProductos ? (
-                            <div className="flex justify-center items-center py-8">
-                                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-                                <span className="ml-2 text-gray-500">Cargando productos...</span>
+                        {isLoadingProductos ? (
+                            <ProductosSkeleton />
+                        ) : errorProductos ? (
+                            <div className="text-center py-8 text-red-500">
+                                <p>Error al cargar los productos</p>
+                                <Button 
+                                    variant="outline" 
+                                    className="mt-4"
+                                    onClick={() => refetchProductos()}
+                                >
+                                    Reintentar
+                                </Button>
                             </div>
                         ) : (
                             <DataTable
