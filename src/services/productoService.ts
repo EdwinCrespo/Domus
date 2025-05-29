@@ -14,6 +14,7 @@ export interface Producto {
   categoriaId: number | null;
   usuarioId: string;
   margenGanancia: number | null;
+  precioVenta: number | null;
 }
 
 export const productoService = {

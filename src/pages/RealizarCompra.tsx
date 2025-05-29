@@ -182,6 +182,21 @@ const RealizarCompra = () => {
     return detalles.reduce((total, detalle) => total + detalle.subtotal, 0);
   };
 
+  const reiniciarEstados = () => {
+    setProveedorId('');
+    setProveedorSearch('');
+    setDetalles([]);
+    setSelectedProducto(null);
+    setCantidad('');
+    setCostoUnitario('');
+    setCodigoLote('');
+    setFechaVencimiento('');
+    setSearchTerm('');
+    setCurrentPage(1);
+    setShowAlert(false);
+    setAlertInfo(null);
+  };
+
   const handleRegistrarCompra = async () => {
     if (!proveedorId || detalles.length === 0) {
       toast.error('Debe seleccionar un proveedor y agregar al menos un producto');
@@ -243,8 +258,12 @@ const RealizarCompra = () => {
       // Después de una compra exitosa
       await queryClient.invalidateQueries({ queryKey: ['inventario'] });
       
-      toast.success('Compra registrada exitosamente. Redirigiendo a la lista de compras...');
-      navigate('/compras', { replace: true });
+      setAlertInfo({
+        type: 'success',
+        title: 'Compra registrada exitosamente',
+        message: 'La compra se ha registrado correctamente. Será redirigido a la lista de compras.'
+      });
+      setShowAlert(true);
     } catch (error) {
       console.error('Error al registrar la compra:', error);
       setAlertInfo({
@@ -262,20 +281,8 @@ const RealizarCompra = () => {
   const handleAlertClose = () => {
     setShowAlert(false);
     if (alertInfo?.type === 'success') {
-      // Limpiar todos los estados
-      setProveedorId('');
-      setProveedorSearch('');
-      setDetalles([]);
-      setSelectedProducto(null);
-      setCantidad('');
-      setCostoUnitario('');
-      setCodigoLote('');
-      setFechaVencimiento('');
-      setSearchTerm('');
-      setCurrentPage(1);
-      
-      // Forzar recarga de la página
-      window.location.href = '/compras/nueva';
+      reiniciarEstados();
+      navigate('/compras/nueva', { replace: true });
     }
   };
 
@@ -583,7 +590,7 @@ const RealizarCompra = () => {
         <div className="flex justify-end space-x-4">
           <Button 
             variant="outline"
-            onClick={() => navigate('/compras')}
+            onClick={() => navigate('/compras/nueva')}
           >
             Cancelar
           </Button>

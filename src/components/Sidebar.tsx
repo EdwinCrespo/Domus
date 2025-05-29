@@ -17,7 +17,8 @@ import {
   ShoppingCart,
   History,
   PlusCircle,
-  Store
+  Store,
+  CreditCard
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { UserData } from '../services/userService'
@@ -35,10 +36,12 @@ interface MenuItem {
   icon: React.ReactNode;
   label: string;
   href?: string;
+  onClick?: () => void;
   submenu?: {
     icon: React.ReactNode;
     label: string;
-    href: string;
+    href?: string;
+    onClick?: () => void;
   }[];
 }
 
@@ -51,6 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const [isVentasOpen, setIsVentasOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isMetodosPagoModalOpen, setIsMetodosPagoModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -93,6 +97,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     loadUserImage()
   }, [user?.id])
 
+  const handleMetodosPagoClick = () => {
+    setIsMetodosPagoModalOpen(true);
+  };
+
   const menuItems: MenuItem[] = [
     { icon: <Home className="w-5 h-5" />, label: 'Inicio', href: '/dashboard' },
     {
@@ -120,7 +128,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         { icon: <Users className="w-4 h-4" />, label: 'Clientes', href: '/ventas/clientes' },
       ]
     },
-  
   ]
 
   const handleEditProfile = () => {
@@ -173,173 +180,181 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   }
 
   return (
-    <div className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
-      {/* Header con foto y nombre */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            className="flex items-center space-x-3 flex-1 hover:bg-gray-50 rounded-lg p-2 transition-colors"
-          >
-            <div className="relative">
-              {userImageUrl ? (
-                <img
-                  src={userImageUrl}
-                  alt="Foto de perfil"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-lg">
-                    {userData?.nombre?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
-                  </span>
+    <>
+      <div className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+        {/* Header con foto y nombre */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              className="flex items-center space-x-3 flex-1 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+            >
+              <div className="relative">
+                {userImageUrl ? (
+                  <img
+                    src={userImageUrl}
+                    alt="Foto de perfil"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500 text-lg">
+                      {userData?.nombre?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {userData ? `${userData.nombre} ${userData.apellido}` : 'Usuario'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user?.email}
+                  </p>
                 </div>
               )}
-            </div>
+            </button>
             {!isCollapsed && (
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {userData ? `${userData.nombre} ${userData.apellido}` : 'Usuario'}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
             )}
-          </button>
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-500 hover:text-gray-700"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+          </div>
+
+          {/* Menú desplegable del perfil */}
+          {isProfileMenuOpen && !isCollapsed && (
+            <div className="mt-2 py-2 bg-white rounded-lg shadow-lg border border-gray-200">
+              <button
+                onClick={handleEditProfile}
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Editar Perfil
+              </button>
+              <button
+                onClick={onLogout}
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Cerrar Sesión
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Menú desplegable del perfil */}
-        {isProfileMenuOpen && !isCollapsed && (
-          <div className="mt-2 py-2 bg-white rounded-lg shadow-lg border border-gray-200">
-            <button
-              onClick={handleEditProfile}
-              className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Editar Perfil
-            </button>
-            <button
-              onClick={onLogout}
-              className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Cerrar Sesión
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Menú de navegación */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-2">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <li key={item.label}>
-                {item.submenu ? (
-                  <div>
+        {/* Menú de navegación */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-1 px-2">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <li key={item.label}>
+                  {item.submenu ? (
+                    <div>
+                      <button
+                        onClick={() => {
+                          if (item.label === 'Productos') {
+                            setIsProductosOpen(!isProductosOpen)
+                            setIsComprasOpen(false)
+                            setIsVentasOpen(false)
+                          } else if (item.label === 'Compras') {
+                            setIsComprasOpen(!isComprasOpen)
+                            setIsProductosOpen(false)
+                            setIsVentasOpen(false)
+                          } else if (item.label === 'Ventas') {
+                            setIsVentasOpen(!isVentasOpen)
+                            setIsProductosOpen(false)
+                            setIsComprasOpen(false)
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          {item.icon}
+                          {!isCollapsed && <span className="ml-3">{item.label}</span>}
+                        </div>
+                        {!isCollapsed && (
+                          <ChevronDown className={`w-4 h-4 transition-transform ${
+                            (item.label === 'Productos' && isProductosOpen) || 
+                            (item.label === 'Compras' && isComprasOpen) ||
+                            (item.label === 'Ventas' && isVentasOpen) 
+                              ? 'transform rotate-180' 
+                              : ''
+                          }`} />
+                        )}
+                      </button>
+                      {((item.label === 'Productos' && isProductosOpen) || 
+                        (item.label === 'Compras' && isComprasOpen) ||
+                        (item.label === 'Ventas' && isVentasOpen)) && 
+                        !isCollapsed && (
+                        <ul className="mt-1 ml-4 space-y-1">
+                          {item.submenu.map((subItem) => (
+                            <li key={subItem.href || subItem.label}>
+                              <button
+                                onClick={() => {
+                                  if (subItem.onClick) {
+                                    subItem.onClick();
+                                  } else if (subItem.href) {
+                                    navigate(subItem.href);
+                                  }
+                                }}
+                                className={`w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+                                  location.pathname === subItem.href
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                {subItem.icon}
+                                <span className="ml-3">{subItem.label}</span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
                     <button
-                      onClick={() => {
-                        if (item.label === 'Productos') {
-                          setIsProductosOpen(!isProductosOpen)
-                          setIsComprasOpen(false)
-                          setIsVentasOpen(false)
-                        } else if (item.label === 'Compras') {
-                          setIsComprasOpen(!isComprasOpen)
-                          setIsProductosOpen(false)
-                          setIsVentasOpen(false)
-                        } else if (item.label === 'Ventas') {
-                          setIsVentasOpen(!isVentasOpen)
-                          setIsProductosOpen(false)
-                          setIsComprasOpen(false)
-                        }
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
+                      onClick={() => item.href && navigate(item.href)}
+                      className={`w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
                         isActive
                           ? 'bg-blue-50 text-blue-600'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex items-center">
-                        {item.icon}
-                        {!isCollapsed && <span className="ml-3">{item.label}</span>}
-                      </div>
-                      {!isCollapsed && (
-                        <ChevronDown className={`w-4 h-4 transition-transform ${
-                          (item.label === 'Productos' && isProductosOpen) || 
-                          (item.label === 'Compras' && isComprasOpen) ||
-                          (item.label === 'Ventas' && isVentasOpen) 
-                            ? 'transform rotate-180' 
-                            : ''
-                        }`} />
-                      )}
+                      {item.icon}
+                      {!isCollapsed && <span className="ml-3">{item.label}</span>}
                     </button>
-                    {((item.label === 'Productos' && isProductosOpen) || 
-                      (item.label === 'Compras' && isComprasOpen) ||
-                      (item.label === 'Ventas' && isVentasOpen)) && 
-                      !isCollapsed && (
-                      <ul className="mt-1 ml-4 space-y-1">
-                        {item.submenu.map((subItem) => (
-                          <li key={subItem.href}>
-                            <button
-                              onClick={() => navigate(subItem.href)}
-                              className={`w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-                                location.pathname === subItem.href
-                                  ? 'bg-blue-50 text-blue-600'
-                                  : 'text-gray-700 hover:bg-gray-50'
-                              }`}
-                            >
-                              {subItem.icon}
-                              <span className="ml-3">{subItem.label}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => item.href && navigate(item.href)}
-                    className={`w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {item.icon}
-                    {!isCollapsed && <span className="ml-3">{item.label}</span>}
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      {/* Footer solo con botón de colapsar cuando está colapsado */}
-      {isCollapsed && (
-        <div className="p-4 border-t border-gray-200">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-center text-gray-500 hover:text-gray-700"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+        {/* Footer solo con botón de colapsar cuando está colapsado */}
+        {isCollapsed && (
+          <div className="p-4 border-t border-gray-200">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-center text-gray-500 hover:text-gray-700"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Modal de Edición de Perfil */}
       {isEditModalOpen && user && userData && (
@@ -361,7 +376,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 

@@ -9,6 +9,7 @@ import Productos from './pages/Productos'
 import InventarioPage from './pages/InventarioPage'
 import Proveedores from './pages/Proveedores'
 import RealizarCompra from './pages/RealizarCompra'
+import RealizarVenta from './pages/RealizarVenta'
 import Clientes from './pages/Clientes'
 import { useAuthStore } from './store/authStore'
 import Sidebar from './components/Sidebar'
@@ -99,6 +100,7 @@ const App = () => {
           <Route path="/compras/proveedores" element={<Proveedores />} />
           <Route path="/compras/nueva" element={<RealizarCompra />} />
           <Route path="/ventas/clientes" element={<Clientes />} />
+          <Route path="/ventas/nueva" element={<RealizarVenta />} />
         </Route>
 
         <Route 
